@@ -1,29 +1,34 @@
 const db = require("../config/db");
 
-exports.addNurse = async (req, res) => {
-  try {
-    const {name, license_number, dob, age } = req.body;
-    
-    const [result] = await db.query(
-      "INSERT INTO nurses (name, license_number, dob, age) VALUES (?, ?, ?, ?)",
-      [name, license_number, dob, age]
-    );
-    res.status(201).json({ message: "Nurse added successfully", nurseId: result.insertId });
-  } catch (err) {
-    console.error("Error adding nurse: ", err);
-    res.status(500).json({ error: "Failed to add nurse" });
-  }
-}
+exports.addNurse = (req, res) => {
+  const { name, license_number, dob, age } = req.body;
 
-exports.getNurses = async (req, res) => {
-  try {
-    const [results] = await db.query("SELECT * FROM nurses WHERE status = 1");
-    res.status(200).json(results);
-  } catch (err) {
-    console.error("Error fetching nurses: ", err);
-    res.status(500).json({ error: "Failed to fetch nurses" });
-  }
-}
+  db.query(
+    "INSERT INTO nurses (name, license_number, dob, age) VALUES (?, ?, ?, ?)",
+    [name, license_number, dob, age]
+  )
+    .then(([result]) => {
+      res.status(201).json({
+        message: "Nurse added successfully",
+        nurseId: result.insertId,
+      });
+    })
+    .catch((err) => {
+      console.error("Error adding nurse: ", err);
+      res.status(500).json({ error: "Failed to add nurse" });
+    });
+};
+
+exports.getNurses = (req, res) => {
+  db.query("SELECT * FROM nurses WHERE status = 1")
+    .then(([results]) => {
+      res.status(200).json(results);
+    })
+    .catch((err) => {
+      console.error("Error fetching nurses: ", err);
+      res.status(500).json({ error: "Failed to fetch nurses" });
+    });
+};
 
 exports.updateNurse = async (req, res) => {
   try {
